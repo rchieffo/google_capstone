@@ -1,0 +1,372 @@
+---
+title: "Google Data Analytics Capstone: Cyclistic Bike Analysis"
+author: "Richard Chieffo"
+date: "2/14/2024"
+output: html_document
+---
+
+# Scenario:
+
+You are a junior data analyst working on the marketing analyst team at Cyclistic, a bike-share
+company in Chicago. The director of marketing believes the company’s future success
+depends on maximizing the number of annual memberships. Therefore, your team wants to
+understand how casual riders and annual members use Cyclistic bikes differently. From these
+insights, your team will design a new marketing strategy to convert casual riders into annual
+members. But first, Cyclistic executives must approve your recommendations, so they must be
+backed up with compelling data insights and professional data visualizations.
+
+# Characters and Teams:
+
+- Cyclistic: A bike-share program that features more than 5,800 bicycles and 600
+docking stations. Cyclistic sets itself apart by also offering reclining bikes, hand
+tricycles, and cargo bikes, making bike-share more inclusive to people with disabilities
+and riders who can’t use a standard two-wheeled bike. The majority of riders opt for
+traditional bikes; about 8% of riders use the assistive options. Cyclistic users are more
+likely to ride for leisure, but about 30% use the bikes to commute to work each day.
+- Lily Moreno: The director of marketing and your manager. Moreno is responsible for
+the development of campaigns and initiatives to promote the bike-share program.
+These may include email, social media, and other channels.
+- Cyclistic marketing analytics team: A team of data analysts who are responsible for
+collecting, analyzing, and reporting data that helps guide Cyclistic marketing strategy.
+You joined this team six months ago and have been busy learning about Cyclistic’s
+mission and business goals—as well as how you, as a junior data analyst, can help
+Cyclistic achieve them.
+- Cyclistic executive team: The notoriously detail-oriented executive team will decide
+whether to approve the recommended marketing program.
+
+# About the Company:
+
+In 2016, Cyclistic launched a successful bike-share offering. Since then, the program has grown
+to a fleet of 5,824 bicycles that are geotracked and locked into a network of 692 stations
+across Chicago. The bikes can be unlocked from one station and returned to any other station
+in the system anytime.
+
+Until now, Cyclistic’s marketing strategy relied on building general awareness and appealing to
+broad consumer segments. One approach that helped make these things possible was the
+flexibility of its pricing plans: single-ride passes, full-day passes, and annual memberships.
+Customers who purchase single-ride or full-day passes are referred to as casual riders.
+Customers who purchase annual memberships are Cyclistic members.
+
+Cyclistic’s finance analysts have concluded that annual members are much more profitable
+than casual riders. Although the pricing flexibility helps Cyclistic attract more customers,
+Moreno believes that maximizing the number of annual members will be key to future growth.
+Rather than creating a marketing campaign that targets all-new customers, Moreno believes
+there is a solid opportunity to convert casual riders into members. She notes that casual riders
+are already aware of the Cyclistic program and have chosen Cyclistic for their mobility needs.
+
+Moreno has set a clear goal: Design marketing strategies aimed at converting casual riders into
+annual members. In order to do that, however, the team needs to better understand how
+annual members and casual riders differ, why casual riders would buy a membership, and how
+digital media could affect their marketing tactics. Moreno and her team are interested in
+analyzing the Cyclistic historical bike trip data to identify trends.
+
+# Ask
+
+##### Three questions will guide the future marketing program:
+1. How do annual members and casual riders use Cyclistic bikes differently?
+2. Why would casual riders buy Cyclistic annual memberships?
+3. How can Cyclistic use digital media to influence casual riders to become members?
+
+Moreno has assigned you the first question to answer: How do annual members and casual
+riders use Cyclistic bikes differently?
+
+##### You will produce a report with the following deliverables:
+1. A clear statement of the business task
+2. A description of all data sources used
+3. Documentation of any cleaning or manipulation of data
+4. A summary of your analysis
+5. Supporting visualizations and key findings
+6. Your top three recommendations based on your analysis
+
+#### Note: 
+I am formatting this document according to the steps of the data analysis process as outlined in the project guidelines and course (Ask, Prepare, Process, Analyze, Share, Act).
+
+# Ask
+
+#### Prompt:
+- What is the problem you are trying to solve?
+- How can your insights drive business decisions?
+- Identify the business task.
+- Consider key stakeholders.
+
+#### Notes: 
+The problem I am trying to solve is to figure out the differences in bike usage between casual riders and annual members. The insights from this analysis can help the marketing team understand why casual users might switch to an annual membership so they can target their digital marketing plan accordingly. 
+
+#### Deliverable (a clear statment of the business task):
+Analyze the difference in Cyclistic Bike use between casual users and annual members.
+
+# Prepare
+
+#### Prompt:
+- Where is your data located? 
+- How is the data organized? 
+- Are there issues with bias or credibility in this data? 
+- How are you addressing licensing, privacy, security, and accessibility? 
+- How did you verify the data’s integrity? 
+- How does it help you answer your question? 
+- Are there any problems with the data?
+
+#### Notes:
+Datasets of the past 12 months (02-2023 - 01-2024) were sourced from [Divvy](https://divvy-tripdata.s3.amazonaws.com/index.html) according to this [license agreement](https://divvybikes.com/data-license-agreement). I downloaded the .csv files for each month and stored them in a Cyclistic Bike Analysis folder on my computer. In order to check the organization of the data I needed to first prepare my R environment. 
+
+#### Deliverable (a description of all data sources used):
+The data mentioned in the above notes was the only data source used in this project.
+
+```{r prepare environment, echo=TRUE, results='hide'}
+install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+library(tidyverse)
+install.packages("lubridate", repos = "http://cran.us.r-project.org")
+library(lubridate)
+install.packages("janitor", repos = "http://cran.us.r-project.org")
+library(janitor)
+install.packages("Rcpp", repos = "http://cran.us.r-project.org")
+library(Rcpp)
+install.packages("dplyr", repos = "http://cran.us.r-project.org")
+library(dplyr)
+load(file = "~/Desktop/Cyclistic Bike Analysis/cyclistic_environment.RData")
+```
+I was able to import the .csv files from February 2023 to January 2024 using `read.csv`
+```{r import .csv files, echo=TRUE, results='hide'}
+Feb_2023 <- read.csv("~/Desktop/Cyclistic Bike Analysis/202302-divvy-tripdata.csv")
+Mar_2023 <- read.csv("~/Desktop/Cyclistic Bike Analysis/202303-divvy-tripdata.csv")
+Apr_2023 <- read.csv("~/Desktop/Cyclistic Bike Analysis/202304-divvy-tripdata.csv")
+May_2023 <- read.csv("~/Desktop/Cyclistic Bike Analysis/202305-divvy-tripdata.csv")
+Jun_2023 <- read.csv("~/Desktop/Cyclistic Bike Analysis/202306-divvy-tripdata.csv")
+Jul_2023 <- read.csv("~/Desktop/Cyclistic Bike Analysis/202307-divvy-tripdata.csv")
+Aug_2023 <- read.csv("~/Desktop/Cyclistic Bike Analysis/202308-divvy-tripdata.csv")
+Sep_2023 <- read.csv("~/Desktop/Cyclistic Bike Analysis/202309-divvy-tripdata.csv")
+Oct_2023 <- read.csv("~/Desktop/Cyclistic Bike Analysis/202310-divvy-tripdata.csv")
+Nov_2023 <- read.csv("~/Desktop/Cyclistic Bike Analysis/202311-divvy-tripdata.csv")
+Dec_2023 <- read.csv("~/Desktop/Cyclistic Bike Analysis/202312-divvy-tripdata.csv")
+Jan_2024 <- read.csv("~/Desktop/Cyclistic Bike Analysis/202401-divvy-tripdata.csv")
+```
+Next I would `View` each dataset to get an idea of the organization of the columns and rows.
+```{r view individual dataframes, echo=TRUE, results='hide'}
+View(Feb_2023)
+View(Mar_2023)
+View(Apr_2023)
+View(May_2023)
+View(Jun_2023)
+View(Jul_2023)
+View(Aug_2023)
+View(Sep_2023)
+View(Oct_2023)
+View(Nov_2023)
+View(Dec_2023)
+View(Jan_2024)
+```
+Columns appeared the same across all tables. Several tables were missing entries on start/end station names and ids. It would be possible to fill these in based on the lat/long. I also wanted to double check the type of data entered in each column using the `str` function.
+```{r individual dataframe structure, echo=TRUE, results='hide'}
+str(Feb_2023)
+str(Mar_2023)
+str(Apr_2023)
+str(May_2023)
+str(Jun_2023)
+str(Jul_2023)
+str(Aug_2023)
+str(Sep_2023)
+str(Oct_2023)
+str(Nov_2023)
+str(Dec_2023)
+str(Jan_2024)
+```
+All of the dataframes had the same structure and used the same type of data for each column. Since they were already uniform in this regard, I decided to combine all the data into one dataframe before doing any further cleaning. Based on some searching on [stack overflow](https://stackoverflow.com/questions/20081256/combine-two-data-frames-with-the-same-column-names) I decided to use the `rbind` function.
+```{r remove individual dataframes, echo=TRUE, results='hide'}
+cyclistic_total <- rbind(Feb_2023,Mar_2023,Apr_2023,May_2023,Jun_2023,Jul_2023,Aug_2023,Sep_2023,Oct_2023,Nov_2023,Dec_2023,Jan_2024)
+```
+I previewed the new total dataframe to make sure everything appeared the same. For the scope of this project I'm not sure how I can check for issues with bias, credibility, or integirty.
+```{r check new combined dataframe, echo=TRUE, results='hide'}
+View(cyclistic_total)
+str(cyclistic_total)
+```
+# Process
+
+#### Prompt:
+- What tools are you choosing and why?
+- Have you ensured your data’s integrity?
+- What steps have you taken to ensure that your data is clean?
+- How can you verify that your data is clean and ready to analyze?
+- Have you documented your cleaning process so you can review and share those
+results?
+
+#### Notes:
+I first tried using Google Sheets and BigQuery to start assessing and cleaning these datasets, but I found that I had a hard time as the amount of data was too large. I also found working through the process with R was easier as I had just finished the R course prior to starting this capstone project. Using the R Markdown file has also helped me document my work and thoughts going through this process. 
+
+#### Deliverable (documentation of any cleaning or manipulation of data):
+First I made a duplicate of my dataframe in case I made any mistakes during the cleaning process.
+```{r copy total dataframe, echo=TRUE, results='hide'}
+cyclistic_total_2 <- cyclistic_total
+```
+Then I separated the 'started_at' column into specific columns for each aspect of the date. 
+```{r create new column for date, month, day, year, and day of week, echo=TRUE, results='hide'}
+cyclistic_total_2$date <- as.Date(cyclistic_total_2$started_at)
+cyclistic_total_2$month <- format(as.Date(cyclistic_total_2$date), "%m")
+cyclistic_total_2$day <- format(as.Date(cyclistic_total_2$date), "%d")
+cyclistic_total_2$year <- format(as.Date(cyclistic_total_2$date), "%Y")
+cyclistic_total_2$day_of_week <- format(as.Date(cyclistic_total_2$date), "%A")
+```
+Then I added a new column for the ride length.
+```{r add new ride_length column, echo=TRUE, results='hide'}
+cyclistic_total_2$ride_length <- difftime(cyclistic_total_2$ended_at, cyclistic_total_2$started_at)
+```
+I converted the new ride length column to numeric data.
+```{r convert ride_length to numeric, echo=TRUE, results='hide'}
+is.factor(cyclistic_total_2$ride_length)
+cyclistic_total_2$ride_length <- as.numeric(as.character(cyclistic_total_2$ride_length))
+is.numeric(cyclistic_total_2$ride_length)
+```
+Using the `summary` function I noticed that there were some rides where the ride length was a negative time. I removed the rides with times of 0 or less and moved the resulting data into a new dataframe. 
+```{r clean data, echo=TRUE, results='hide'}
+summary(cyclistic_total_2)
+cyclistic_total_clean <- cyclistic_total_2[!(cyclistic_total_2$ride_length <= 0),]
+```
+# Analyze
+
+#### Prompt:
+- How should you organize your data to perform analysis on it?
+- Has your data been properly formatted?
+- What surprises did you discover in the data?
+- What trends or relationships did you find in the data?
+- How will these insights help answer your business questions?
+- Aggregate your data so it’s useful and accessible.
+- Organize and format your data.
+- Perform calculations.
+- Identify trends and relationships.
+
+#### Notes:
+I think most of the aggregating, formatting, and organizing steps were taken care of in the Process phase of this project. In this section I will focus on analyzing the my clean dataframe. I started with a descriptive analysis on the total ride length of both members and casual users.
+```{r clean dataframe total ride length descriptive analysis}
+summary(cyclistic_total_clean$ride_length)
+```
+Then I compared these values between members and casual users. 
+```{r member vs. casual ride length descriptive analysis}
+aggregate(cyclistic_total_clean$ride_length~cyclistic_total_clean$member_casual, FUN = mean)
+aggregate(cyclistic_total_clean$ride_length~cyclistic_total_clean$member_casual, FUN = median)
+aggregate(cyclistic_total_clean$ride_length~cyclistic_total_clean$member_casual, FUN = max)
+aggregate(cyclistic_total_clean$ride_length~cyclistic_total_clean$member_casual, FUN = min)
+```
+Then I compared the average ride length between members and casual users on each day of the week.
+```{r average ride length member vs casual by day of week}
+aggregate(cyclistic_total_clean$ride_length~cyclistic_total_clean$member_casual+cyclistic_total_clean$day_of_week, FUN = mean)
+```
+The resulting days of the week did not appear in order, so I reordered them and then ran the previous line again.
+```{r reorder days of week and run average again}
+cyclistic_total_clean$day_of_week <- ordered(cyclistic_total_clean$day_of_week, levels=c("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"))
+aggregate(cyclistic_total_clean$ride_length~cyclistic_total_clean$member_casual+cyclistic_total_clean$day_of_week, FUN = mean)
+```
+Then I analyzed the number of rides and average duration of rides by the day of week in members vs. casual users.
+```{r ridership data by type and weekday}
+cyclistic_total_clean %>% 
+  mutate(weekday=wday(started_at,label = TRUE)) %>% 
+  group_by(member_casual,weekday) %>% 
+  summarise(number_of_rides=n(),average_duration=mean(ride_length)) %>% 
+  arrange(member_casual,weekday)
+```
+Then I created a visualization of the number of rides by rider type on each day of the week.
+```{r visualize number of rides by rider type}
+cyclistic_total_clean %>% 
+  mutate(weekday=wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual,weekday) %>% 
+  summarise(number_of_rides=n(),average_duration=mean(ride_length)) %>% 
+  arrange(member_casual,weekday) %>% 
+  ggplot(aes(x=weekday,y=number_of_rides,fill=member_casual))+
+  geom_col(position = "dodge")
+```
+
+
+This resulted in a chart with the Y axis in scientific notation. I found an [article about this project](https://medium.com/@mattnwells/cyclistic-bike-share-maximizing-annual-membership-2451ebfea1c3) that had a line of code for eliminating the scientific notation in the graph. I ran that and then reran the visualization.
+```{r remove scientific notation from previous chart}
+options(scipen = 999)
+cyclistic_total_clean %>% 
+  mutate(weekday=wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual,weekday) %>% 
+  summarise(number_of_rides=n(),average_duration=mean(ride_length)) %>% 
+  arrange(member_casual,weekday) %>% 
+  ggplot(aes(x=weekday,y=number_of_rides,fill=member_casual))+
+  geom_col(position = "dodge")
+```
+
+
+Then I created another visualization of the average duration by rider type on each day of the week.
+```{r visualize average duration by rider type}
+cyclistic_total_clean %>% 
+  mutate(weekday=wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual,weekday) %>% 
+  summarise(number_of_rides=n(),average_duration=mean(ride_length)) %>% 
+  arrange(member_casual,weekday) %>% 
+  ggplot(aes(x=weekday,y=average_duration,fill=member_casual))+
+  geom_col(position = "dodge")
+```
+
+
+I also created a visualizations of average ride duration and number of trips by month.
+```{r visualize number of rides and average duration per month}
+cyclistic_total_clean %>% 
+  group_by(member_casual,month) %>% 
+  summarise(number_of_rides=n(),average_duration=mean(ride_length)) %>% 
+  arrange(member_casual,month) %>% 
+  ggplot(aes(x=month,y=number_of_rides,fill=member_casual))+
+  geom_col(position = "dodge")
+cyclistic_total_clean %>% 
+  group_by(member_casual,month) %>% 
+  summarise(number_of_rides=n(),average_duration=mean(ride_length)) %>% 
+  arrange(member_casual,month) %>% 
+  ggplot(aes(x=month,y=average_duration,fill=member_casual))+
+  geom_col(position = "dodge")
+```
+
+
+#### Deliverable (a summary of your analysis):
+
+Finally I exported a summary file for further analysis.
+```{r export summary file}
+cyclistic_summary <- aggregate(cyclistic_total_clean$ride_length~cyclistic_total_clean$member_casual+cyclistic_total_clean$day_of_week,FUN = mean)
+write.csv(cyclistic_summary, file = 'avg_ride_length.csv')
+```
+I also installed a dashboard template for R markdown to include all of my visualizations together.
+```{r dashboard package, echo=FALSE}
+install.packages("flexdashboard", repos = "http://cran.us.r-project.org")
+library(flexdashboard)
+```
+# Share
+
+#### Prompt:
+- Were you able to answer the question of how annual members and casual riders use Cyclistic bikes differently?
+- What story does your data tell?
+- How do your findings relate to your original question?
+- Who is your audience? What is the best way to communicate with them?
+- Can data visualization help you share your findings?
+- Is your presentation accessible to your audience?
+- Determine the best way to share your findings.
+- Create effective data visualizations.
+- Present your findings.
+- Ensure your work is accessible.
+
+#### Notes:
+I was able to notice some distinct trends in the differences in use between annual members and casual riders on both a daily and monthly basis in terms of the number of rides and the average duration of the rides. Annual members have a higher concentration of rides during the week with less rides on the weekends. Casual riders tend to have lower numbers of rides during the week with rides increasing on the weekend. The number of rides for both types of riders peaks during the summer months and decreases significantly during the winter. Regarding the duration of the rides, casual riders take longer rides on average than annual members with the duration increasing on the weekends and summer months. Annual member ride duration remains relatively constant across the days and months. 
+
+In my interpretation this data paints a picture of annual members using the bikes for their daily commute or routine tasks while casual riders use the bikes for leisure or tourism purposes. This is simply a guess on my part, but even so my findings do show significant differences in the bike use between the two types of riders which could be helpful for the marketing team to try to increase the number of annual members. 
+
+I feel that the visualization dashboard that I created would be an accessible and effective means to share the differences I noticed in this data with Lily Moreno and the marketing team. 
+
+#### Deliverable (supporting visualizations and key findings):
+My deliverable is the dashboard I created with the R Markdown file and the flexdashboard package.
+
+# Act
+
+#### Prompt:
+- What is your final conclusion based on your analysis?
+- How could your team and business apply your insights?
+- What next steps would you or your stakeholders take based on your findings?
+- Is there additional data you could use to expand on your findings?
+
+#### Notes:
+My final conclusion based on my analysis is that annual members are more likely to be people in the local community who are using the Cyclistic bikes as a means of transportation for work and daily errands while causal riders are using the bikes for pleasure. I might suggest focusing on connecting with local businesses in order to work out some kind of membership deal for employees or at least targeting their advertisements towards people living and working in the area. This could be seen as a way for employees to get more regular exercise which could benefit company health insurance. It could also be seen as a more environmentally friendly way to commute to work. I would also like to further analyse the stations where most annual members are starting and ending their rides to see if there could be any benefit to marketing to businesses and workers in these or similar areas.   
+
+I would also be interested in customer data for casual riders. Are they local or tourists? If they are local is there something preventing them from upgrading to an annual membership? Are they people who live a long distance from where they work? Do they not have convenient access to the bike stations near their home or workplace? There is probably potential to direct marketing efforts and growth strategies towards this customer segment as well. 
+
+#### Deliverable (your top three recommendations based on your analysis):
+
+- Direct digital advertising towards local business around the bike stations.
+- Form partnerships with businesses whose employees could benefit from annual memberships.
+- Further study local casual riders to figure out ways to increase conversion to annual memberships.

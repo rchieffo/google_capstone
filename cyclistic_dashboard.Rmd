@@ -1,0 +1,81 @@
+---
+title: Cyclistic Data Analysis
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+options(scipen = 999)
+load(file = "~/Desktop/Cyclistic Bike Analysis/cyclistic_environment.RData")
+```
+
+Column 
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r rides per day}
+cyclistic_total_clean %>% 
+  mutate(weekday=wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual,weekday) %>% 
+  summarise(number_of_rides=n(),average_duration=mean(ride_length)) %>% 
+  arrange(member_casual,weekday) %>% 
+  ggplot(aes(x=weekday,y=number_of_rides,fill=member_casual))+
+  geom_col(position = "dodge") +
+  labs(title = "Number of Rides per Day", subtitle = "Feb 2023 - Jan 2024", fill = "Rider Type")+
+  xlab("Weekday")+
+  ylab("Number of Rides")
+```
+
+### Chart B
+
+```{r avg duration per day}
+cyclistic_total_clean %>% 
+  mutate(weekday=wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual,weekday) %>% 
+  summarise(number_of_rides=n(),average_duration=mean(ride_length)) %>% 
+  arrange(member_casual,weekday) %>% 
+  ggplot(aes(x=weekday,y=average_duration,fill=member_casual))+
+  geom_col(position = "dodge")+
+  labs(title = "Average Duration per Day", subtitle = "Feb 2023 - Jan 2024", fill = "Rider Type")+
+  xlab("Month")+
+  ylab("Average Duration")
+```
+
+Column 
+-----------------------------------------------------------------------
+
+### Chart C
+
+```{r rides per month}
+cyclistic_total_clean %>% 
+  group_by(member_casual,month) %>% 
+  summarise(number_of_rides=n(),average_duration=mean(ride_length)) %>% 
+  arrange(member_casual,month) %>% 
+  ggplot(aes(x=month,y=number_of_rides,fill=member_casual))+
+  geom_col(position = "dodge")+
+  labs(title = "Number of Rides per Month", subtitle = "Feb 2023 - Jan 2024", fill = "Rider Type")+
+  xlab("Month")+
+  ylab("Number of Rides")
+```
+
+### Chart D
+
+```{r avg duration per month}
+cyclistic_total_clean %>% 
+  group_by(member_casual,month) %>% 
+  summarise(number_of_rides=n(),average_duration=mean(ride_length)) %>% 
+  arrange(member_casual,month) %>% 
+  ggplot(aes(x=month,y=average_duration,fill=member_casual))+
+  geom_col(position = "dodge")+
+  labs(title = "Average Duration per Month", subtitle = "Feb 2023 - Jan 2024", fill = "Rider Type")+
+  xlab("Month")+
+  ylab("Average Duration")
+```
+
